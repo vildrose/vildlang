@@ -2,5 +2,5 @@
 
 #[path = "common/mod.rs"]
 mod common;
-#[path = "example/mod.rs"]
-mod example;
+#[path = "lexer/mod.rs"]
+mod lexer;

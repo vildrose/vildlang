@@ -1,3 +1,6 @@
-# Vildrose Template
+# Vildlang
 
-- [Example](readme.md)
+- [Introduction](readme.md)
+- [Pipeline](pipeline/readme.md)
+  - [Lexer](pipeline/lexer.md)
+  - [Parser](pipeline/parser.md)

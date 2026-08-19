@@ -1,5 +1,5 @@
 [book]
-title = "Vildrose-Template"
+title = "Vildlang"
 authors = ["silvijai"]
 language = "en"
 src = "src"
@@ -8,8 +8,8 @@ src = "src"
 build-dir = "../target/mdbook"
 
 [output.html]
-git-repository-url = "https://github.com/vildrose/vildrose-template"
-edit-url-template = "https://github.com/vildrose/vildrose-template/edit/main/docs/src/{path}"
+git-repository-url = "https://github.com/vildrose/vildlang"
+edit-url-template = "https://github.com/vildrose/vildlang/docs/src/{path}"
 default-theme = "Light"
 preferred-dark-theme = "Ayu"
 

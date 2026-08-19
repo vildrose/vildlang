@@ -1,6 +1,6 @@
 [package]
-name = "vildrose-example"
-description = "Example for vildrose crates"
+name = "vildlang"
+description = "Vildlang lexer, parser, and frontend toolchain"
 
 version.workspace = true
 edition.workspace = true
