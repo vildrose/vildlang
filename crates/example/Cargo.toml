@@ -1,0 +1,28 @@
+[package]
+name = "vildrose-example"
+description = "Example for vildrose crates"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+# Consider having some in the future
+
+[dev-dependencies]
+proptest = { workspace = true }
+insta = { workspace = true }
+criterion = { workspace = true }
+
+# [[bench]]
+# name = "benchmarks"
+# harness = false
+
+[lints]
+workspace = true

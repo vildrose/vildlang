@@ -1,0 +1,19 @@
+[book]
+title = "Vildrose-Template"
+authors = ["silvijai"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../target/mdbook"
+
+[output.html]
+git-repository-url = "https://github.com/vildrose/vildrose-template"
+edit-url-template = "https://github.com/vildrose/vildrose-template/edit/main/docs/src/{path}"
+default-theme = "Light"
+preferred-dark-theme = "Ayu"
+
+[preprocessor.d2]
+path = "d2"
+layout = "dagre"
+inline = true

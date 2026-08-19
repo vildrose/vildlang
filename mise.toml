@@ -1,0 +1,141 @@
+# Mise is used to manage dependencies and run tasks. See it as an alternative to flake.nix.
+# https://mise.jdx.dev/
+min_version = "2026.7.0"
+
+[env]
+RUSTC_WRAPPER = "sccache"
+
+[tools]
+python = "3.13"
+
+"cargo:cargo-nextest" = "latest"
+"cargo:cargo-expand" = "latest"
+"cargo:cargo-deny" = "latest"
+"cargo:cargo-zigbuild" = "latest"
+"cargo:sccache" = "latest"
+"cargo:bacon" = "latest"
+"cargo:git-cliff" = "latest"
+"cargo:mdbook" = "latest"
+"cargo:mdbook-d2" = "latest"
+"cargo:samply" = "latest"
+
+"aqua:terrastruct/d2" = "latest"
+
+[tasks.build]
+description = "Build all workspace crates"
+run = "cargo build --workspace"
+
+[tasks.test]
+description = "Run standard workspace tests"
+run = "cargo nextest run --workspace"
+
+[tasks.test-full]
+description = "Run all tests, including ignored tests"
+run = "cargo nextest run --workspace --run-ignored all --no-fail-fast"
+
+[tasks.bench]
+description = "Run Criterion benchmarks (generic crate/bench/filter)"
+usage = '''
+arg "<crate>" help="Workspace crate/package name, e.g. vildrose-core"
+arg "<bench>" help="Bench target name, e.g. benchmarks"
+arg "[filter]" help="Optional Criterion benchmark filter, e.g. 'trit packing/4encode'"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+crate="{{usage.crate}}"
+bench="{{usage.bench}}"
+filter="{{usage.filter | default(value='')}}"
+
+cmd=(cargo bench -p "$crate" --bench "$bench" --)
+if [ -n "$filter" ]; then
+  cmd+=("$filter")
+fi
+
+echo "[bench] Running: ${cmd[*]}"
+exec "${cmd[@]}"
+'''
+
+[tasks.bench-profile]
+description = "Profile Criterion bench target with Samply (generic)"
+usage = '''
+arg "<crate>" help="Workspace crate/package name, e.g. vildrose-core"
+arg "<bench>" help="Bench target name, e.g. benchmarks"
+arg "[filter]" help="Optional Criterion benchmark filter"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+crate="{{usage.crate}}"
+bench="{{usage.bench}}"
+filter="{{usage.filter | default(value='')}}"
+
+cmd=(cargo bench -p "$crate" --bench "$bench" --)
+if [ -n "$filter" ]; then
+  cmd+=("$filter")
+fi
+
+echo "[bench-profile] Profiling: ${cmd[*]}"
+exec samply record -- "${cmd[@]}"
+'''
+
+[tasks.bench-all]
+description = "Run all workspace benches"
+run = "cargo bench --workspace"
+
+[tasks.bench-test]
+description = "Compile Criterion benchmarks without running them"
+run = "cargo bench --workspace --no-run"
+
+[tasks.lint]
+description = "Run Clippy with warnings treated as errors"
+run = "cargo clippy --workspace --all-targets --all-features -- -D warnings"
+
+[tasks.fmt]
+description = "Format Rust"
+run = "cargo fmt --all"
+
+[tasks.docs]
+description = "Build Rust API documentation"
+run = 'RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps'
+
+[tasks.docs-test]
+description = "Run Rust documentation tests"
+run = "cargo test --workspace --doc"
+
+[tasks.book]
+description = "Serve the mdBook"
+run = "mdbook serve docs/"
+
+[tasks.book-test]
+description = "Test mdBook documentation"
+run = "mdbook test docs/"
+
+[tasks.watch]
+description = "Continuously run the tests"
+run = "bacon test"
+
+[tasks.watch-crate]
+description = "Run Bacon for one package"
+usage = '''
+arg "<crate>" help="Workspace crate/package name"
+'''
+run = "bacon -j test -- -p {{usage.crate}}"
+
+[tasks.ci]
+description = "Run CI-equivalent checks"
+run = """
+mise run lint
+mise run test-full
+"""
+
+[tasks.check]
+description = "Run every local quality check (run this before committing)"
+run = """
+mise run ci
+mise run docs-test
+mise run book-test
+mise run bench-test
+"""

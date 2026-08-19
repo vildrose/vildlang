@@ -1,0 +1,53 @@
+dictionaries = ["en_us"]
+
+words = [
+  "Trit",
+  "Trits",
+  "Tritwise",
+  "Tmin",
+  "Tmax",
+  "Tnot",
+  "Tclip",
+  "tsignum",
+  "signum",
+  "tconsensus",
+  "tshl",
+  "tshr",
+  "tlshr",
+  "Kleene",
+  "Kleenes",
+  "Tryte",
+  "Tribble",
+  "Trytes",
+  "Word9",
+  "Word27",
+  "Word54",
+  "Words",
+  "direnv",
+  "Vildrose",
+  "Hyldeblomst",
+  "Nemunas",
+  "Snerle",
+  "Mirabelle",
+  "Anemone",
+  "Vildlang",
+  "Vildcode",
+  "Setun",
+  "CNTFET",
+  "Setnex",
+  "mise",
+]
+
+ignore_paths = [
+  ".direnv",
+  "target",
+  ".git",
+  ".jj",
+]
+
+ignore_patterns = [
+  '\b[NZP]+\b',
+  'https?://[^\s]+',
+]
+
+min_word_length = 2
