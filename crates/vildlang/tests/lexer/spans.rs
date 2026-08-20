@@ -55,7 +55,10 @@ mod tests {
         assert_eq!(x.span.end.line, 1);
         assert_eq!(x.span.end.column, 2);
 
-        let y = &output.tokens[1];
+        let newline = &output.tokens[1];
+        assert_eq!(newline.kind, TokenKind::Newline);
+
+        let y = &output.tokens[2];
         assert_eq!(y.kind, TokenKind::Ident("y".to_owned()));
         assert_eq!(y.span.start.byte, 4);
         assert_eq!(y.span.end.byte, 5);

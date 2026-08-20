@@ -40,13 +40,11 @@ mod tests {
 
     #[test]
     fn comments_are_skipped() {
-        let source = "
-            /* Block comment. */
-            // Line comment.
-            fn plus_one(x : int) : int {
-                return x + 1; // Trailing line comment.
-            }
-        ";
+        let source = "/* Block comment. */
+// Line comment.
+fn plus_one(x : int) -> int {
+    return x + 1 // Trailing line comment.
+}";
 
         let output = lex(source, FileId(0));
 
@@ -63,6 +61,8 @@ mod tests {
                 .map(|token| token.kind)
                 .collect::<Vec<_>>(),
             vec![
+                TokenKind::Newline,
+                TokenKind::Newline,
                 TokenKind::Fn,
                 TokenKind::Ident("plus_one".to_owned()),
                 TokenKind::LeftParen,
@@ -70,14 +70,15 @@ mod tests {
                 TokenKind::Colon,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::RightParen,
-                TokenKind::Colon,
+                TokenKind::Arrow,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::LeftBrace,
+                TokenKind::Newline,
                 TokenKind::Return,
                 TokenKind::Ident("x".to_owned()),
                 TokenKind::Plus,
                 TokenKind::Int(1),
-                TokenKind::Semicolon,
+                TokenKind::Newline,
                 TokenKind::RightBrace,
                 TokenKind::Eof,
             ],
@@ -87,16 +88,16 @@ mod tests {
     #[test]
     fn comments_update_line_numbers() {
         let output = lex(
-            "/* First line.\nSecond line. */\nfn answer() : int { return 42; }",
+            "/* First line.\nSecond line. */\nfn answer() -> int { return 42; }",
             FileId(0),
         );
 
         let fn_token = output
             .tokens
-            .first()
-            .expect("expected `fn` token after comment");
+            .iter()
+            .find(|token| token.kind == TokenKind::Fn)
+            .expect("expected `fn` token after block comment");
 
-        assert_eq!(fn_token.kind, TokenKind::Fn);
         assert_eq!(fn_token.span.start.line, 3);
         assert_eq!(fn_token.span.start.column, 1);
     }

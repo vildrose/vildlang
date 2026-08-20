@@ -29,6 +29,8 @@ pub enum TokenKind {
     Return,
     /// Represents the `when` keyword.
     When,
+    /// Represents the `const` keyword.
+    Const,
 
     // Names and literals
     /// Represents an identifier.
@@ -51,6 +53,10 @@ pub enum TokenKind {
     Comma,
     /// Represents a semicolon `;`.
     Semicolon,
+    /// Represents a newline `\n`.
+    Newline,
+    /// Represents a bang `!`.
+    Bang,
 
     // Operators
     /// Represents a plus `+`.

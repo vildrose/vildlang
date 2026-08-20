@@ -34,6 +34,7 @@ struct Lexer<'a> {
     current: Option<(usize, char)>,
     next: Option<(usize, char)>,
     position: Position,
+    paren_depth: usize,
     tokens: Vec<Token>,
     diagnostics: Vec<LexDiagnostic>,
 }
@@ -49,6 +50,7 @@ impl<'a> Lexer<'a> {
             next: chars.next(),
             chars,
             position: Position::start(),
+            paren_depth: 0,
             tokens: Vec::new(),
             diagnostics: Vec::new(),
         }
@@ -66,12 +68,18 @@ impl<'a> Lexer<'a> {
                 .expect("lexer loop requires a current character");
 
             match ch {
-                '(' => self.lex_single(TokenKind::LeftParen, start),
-                ')' => self.lex_single(TokenKind::RightParen, start),
+                '\n' => self.lex_newline(start),
+
+                '(' => self.lex_left_paren(start),
+                ')' => self.lex_right_paren(start),
+
                 '{' => self.lex_single(TokenKind::LeftBrace, start),
                 '}' => self.lex_single(TokenKind::RightBrace, start),
+
                 ',' => self.lex_single(TokenKind::Comma, start),
                 ';' => self.lex_single(TokenKind::Semicolon, start),
+                '!' => self.lex_single(TokenKind::Bang, start),
+
                 '+' => self.lex_single(TokenKind::Plus, start),
                 '*' => self.lex_single(TokenKind::Star, start),
                 '=' => self.lex_single(TokenKind::Assign, start),
@@ -89,13 +97,13 @@ impl<'a> Lexer<'a> {
         self.finish()
     }
 
-    /// Skips source content that is relevant to spans but irrelevant to grammar.
+    /// Skips source text irrelevant to the grammar.
     ///
-    /// This includes whitespace and ordinary comments. Returns `true` if any
-    /// source text was consumed.
+    /// Spaces, tabs, carriage returns, and ordinary comments are skipped.
+    /// Newlines are intentionally not skipped: they may delimit statements.
     fn skip_trivia(&mut self) -> bool {
         match self.current_char() {
-            Some(' ' | '\t' | '\r' | '\n') => {
+            Some(' ' | '\t' | '\r') => {
                 self.advance();
                 true
             }
@@ -114,10 +122,47 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Emits `Newline` outside parentheses.
+    ///
+    /// A newline inside a parenthesized group is formatting-only. This allows:
+    ///
+    /// ```vild
+    /// fn add(
+    ///     left : int,
+    ///     right : int,
+    /// ) -> int {
+    ///     ...
+    /// }
+    /// ```
+    fn lex_newline(&mut self, start: Position) {
+        self.advance();
+
+        if self.paren_depth == 0 {
+            self.emit(TokenKind::Newline, start);
+        }
+    }
+
+    /// Lexes `(` and enters a parenthesized formatting group.
+    fn lex_left_paren(&mut self, start: Position) {
+        self.advance();
+        self.emit(TokenKind::LeftParen, start);
+        self.paren_depth += 1;
+    }
+
+    /// Lexes `)` and exits a parenthesized formatting group.
+    ///
+    /// An unmatched `)` remains a parser diagnostic. Saturating subtraction
+    /// keeps the lexer total and prevents integer underflow.
+    fn lex_right_paren(&mut self, start: Position) {
+        self.advance();
+        self.paren_depth = self.paren_depth.saturating_sub(1);
+        self.emit(TokenKind::RightParen, start);
+    }
+
     /// Skips `//` through the end of the current line.
     ///
-    /// The newline itself remains for `skip_trivia` to consume on the next
-    /// lexer iteration, so all newline position updates share one path.
+    /// The physical newline remains unconsumed so `lex_all` can emit the
+    /// appropriate `Newline` token on the next iteration.
     fn skip_line_comment(&mut self) {
         self.advance(); // First '/'
         self.advance(); // Second '/'
@@ -129,9 +174,11 @@ impl<'a> Lexer<'a> {
 
     /// Skips a non-nesting `/* ... */` comment.
     ///
-    /// Emits one diagnostic when the source ends before the closing `*/`.
+    /// Physical newlines inside the comment still produce `Newline` tokens
+    /// when outside parentheses, so comments behave like whitespace without
+    /// silently joining separate source lines.
     fn skip_block_comment(&mut self) {
-        let start = self.position;
+        let comment_start = self.position;
 
         self.advance(); // '/'
         self.advance(); // '*'
@@ -140,7 +187,7 @@ impl<'a> Lexer<'a> {
             match (self.current_char(), self.next_char()) {
                 (None, _) => {
                     self.diagnostics.push(LexDiagnostic {
-                        span: Span::new(self.file, start, self.position),
+                        span: Span::new(self.file, comment_start, self.position),
                         message: "unterminated block comment".to_owned(),
                     });
                     return;
@@ -150,6 +197,11 @@ impl<'a> Lexer<'a> {
                     self.advance(); // '*'
                     self.advance(); // '/'
                     return;
+                }
+
+                (Some('\n'), _) => {
+                    let newline_start = self.position;
+                    self.lex_newline(newline_start);
                 }
 
                 _ => self.advance(),
@@ -222,6 +274,7 @@ impl<'a> Lexer<'a> {
             "fn" => TokenKind::Fn,
             "return" => TokenKind::Return,
             "when" => TokenKind::When,
+            "const" => TokenKind::Const,
             _ => TokenKind::Ident(text.to_owned()),
         };
 

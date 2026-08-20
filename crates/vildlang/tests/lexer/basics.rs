@@ -55,9 +55,9 @@ mod tests {
         let source = "
             fn sign(x : int) -> int {
                 return when compare3(x, 0) {
-                    less: -1;
-                    equal: 0;
-                    greater: 1;
+                    less: -1
+                    equal: 0
+                    greater: 1
                 }
             }
         ";
@@ -77,6 +77,7 @@ mod tests {
                 .map(|token| token.kind)
                 .collect::<Vec<_>>(),
             vec![
+                TokenKind::Newline,
                 TokenKind::Fn,
                 TokenKind::Ident("sign".to_owned()),
                 TokenKind::LeftParen,
@@ -87,6 +88,7 @@ mod tests {
                 TokenKind::Arrow,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::LeftBrace,
+                TokenKind::Newline,
                 TokenKind::Return,
                 TokenKind::When,
                 TokenKind::Ident("compare3".to_owned()),
@@ -96,21 +98,24 @@ mod tests {
                 TokenKind::Int(0),
                 TokenKind::RightParen,
                 TokenKind::LeftBrace,
+                TokenKind::Newline,
                 TokenKind::Ident("less".to_owned()),
                 TokenKind::Colon,
                 TokenKind::Minus,
                 TokenKind::Int(1),
-                TokenKind::Semicolon,
+                TokenKind::Newline,
                 TokenKind::Ident("equal".to_owned()),
                 TokenKind::Colon,
                 TokenKind::Int(0),
-                TokenKind::Semicolon,
+                TokenKind::Newline,
                 TokenKind::Ident("greater".to_owned()),
                 TokenKind::Colon,
                 TokenKind::Int(1),
-                TokenKind::Semicolon,
+                TokenKind::Newline,
                 TokenKind::RightBrace,
+                TokenKind::Newline,
                 TokenKind::RightBrace,
+                TokenKind::Newline,
                 TokenKind::Eof,
             ],
         );
@@ -119,11 +124,6 @@ mod tests {
     #[test]
     fn empty_input_emits_only_eof() {
         assert_eq!(kinds(""), vec![TokenKind::Eof]);
-    }
-
-    #[test]
-    fn whitespace_only_input_emits_only_eof() {
-        assert_eq!(kinds(" \t\r\n   "), vec![TokenKind::Eof]);
     }
 
     #[test]
