@@ -1,0 +1,62 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: homeserver
+
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_BUILD_JOBS: 3
+
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v6
+
+      - name: Install Rust
+        uses: https://github.com/dtolnay/rust-toolchain@stable
+
+      - name: Install mdBook
+        uses: https://github.com/taiki-e/install-action@v2
+        with:
+          tool: mdbook
+
+      - name: Install mdbook-d2
+        run: cargo install mdbook-d2 --locked
+
+      - name: Install D2
+        run: curl -fsSL https://d2lang.com/install.sh | sh -s --
+
+      - name: Build Rust API documentation
+        run: cargo doc --workspace --no-deps
+
+      - name: Test mdBook
+        run: mdbook test docs/
+
+      - name: Build mdBook
+        run: mdbook build docs/
+
+      - name: Assemble static site
+        if: forge.ref == 'refs/heads/main'
+        run: |
+          rm -rf public
+          mkdir -p public
+
+          cp -R docs/site/. public/
+          cp -R target/mdbook/. public/book/
+          cp -R target/doc/. public/api/
+
+          touch public/.nojekyll
+          touch public/book/.nojekyll
+          touch public/api/.nojekyll
+
+      - name: Deploy to Codeberg Pages
+        if: forge.ref == 'refs/heads/main'
+        uses: https://codeberg.org/git-pages/action@v2
+        with:
+          site: https://vildrose.codeberg.page/vildlang
+          token: ${{ forgejo.token }}
+          source: public/

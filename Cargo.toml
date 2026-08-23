@@ -1,11 +1,11 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/vildlang",
+  "crates/vildlang",
 ]
 
 default-members = [
-    "crates/vildlang",
+  "crates/vildlang",
 ]
 
 [workspace.package]
@@ -13,15 +13,14 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.87"
 authors = ["Silvija Ivanovaite"]
-license = "MIT"
-repository = "https://github.com/vildrose/vildlang"
-homepage = "https://github.com/vildrose/vildlang"
+license = "Apache-2.0"
+repository = "https://codeberg.org/vildrose/vildlang"
 keywords = []
 categories = []
 
 [workspace.dependencies]
 # Currently just using git directly, without tagged release
-vildrose-core = { git = "https://github.com/vildrose/core" }
+vildrose-core = { git = "https://codeberg.org/vildrose/core" }
 
 proptest = "1"
 insta = { version = "1", features = ["ron"] }

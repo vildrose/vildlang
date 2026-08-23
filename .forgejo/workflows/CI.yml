@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: homeserver
+
+    env:
+      CARGO_INCREMENTAL: 0
+
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v6
+
+      - name: Install Rust
+        uses: https://github.com/dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
+
+      - name: Cache Rust build artifacts
+        uses: https://github.com/Swatinem/rust-cache@v2
+        with:
+          shared-key: vildrose-rust
+          cache-all-crates: true
+          cache-on-failure: true
+
+      - name: Install cargo-nextest
+        uses: https://github.com/taiki-e/install-action@nextest
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Build benchmarks
+        run: cargo bench --workspace --no-run
+
+      - name: Test
+        run: cargo nextest run --workspace --run-ignored all
