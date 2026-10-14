@@ -1,4 +1,4 @@
-use crate::common::tokens::kinds;
+use crate::common::tokens::{int, kinds};
 use vildlang::lexer::lex;
 use vildlang::span::FileId;
 use vildlang::token::TokenKind;
@@ -25,7 +25,7 @@ mod tests {
     fn lexes_negative_integer_as_two_tokens() {
         assert_eq!(
             kinds("-42"),
-            vec![TokenKind::Minus, TokenKind::Int(42), TokenKind::Eof,],
+            vec![TokenKind::Minus, int(42), TokenKind::Eof,],
         );
     }
 
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn lexes_the_sign_fixture_without_errors() {
         let source = "
-            fn sign(x : int) -> int {
+            fn sign(x : int) : int {
                 return when compare3(x, 0) {
                     less: -1
                     equal: 0
@@ -85,7 +85,7 @@ mod tests {
                 TokenKind::Colon,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::RightParen,
-                TokenKind::Arrow,
+                TokenKind::Colon,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::LeftBrace,
                 TokenKind::Newline,
@@ -95,22 +95,22 @@ mod tests {
                 TokenKind::LeftParen,
                 TokenKind::Ident("x".to_owned()),
                 TokenKind::Comma,
-                TokenKind::Int(0),
+                int(0),
                 TokenKind::RightParen,
                 TokenKind::LeftBrace,
                 TokenKind::Newline,
                 TokenKind::Ident("less".to_owned()),
                 TokenKind::Colon,
                 TokenKind::Minus,
-                TokenKind::Int(1),
+                int(1),
                 TokenKind::Newline,
                 TokenKind::Ident("equal".to_owned()),
                 TokenKind::Colon,
-                TokenKind::Int(0),
+                int(0),
                 TokenKind::Newline,
                 TokenKind::Ident("greater".to_owned()),
                 TokenKind::Colon,
-                TokenKind::Int(1),
+                int(1),
                 TokenKind::Newline,
                 TokenKind::RightBrace,
                 TokenKind::Newline,
@@ -156,11 +156,7 @@ mod tests {
     fn digit_prefix_splits_integer_and_identifier() {
         assert_eq!(
             kinds("123abc"),
-            vec![
-                TokenKind::Int(123),
-                TokenKind::Ident("abc".to_owned()),
-                TokenKind::Eof,
-            ],
+            vec![int(123), TokenKind::Ident("abc".to_owned()), TokenKind::Eof,],
         );
     }
 }

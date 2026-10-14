@@ -2,6 +2,7 @@
 
 use crate::span::{FileId, Position, Span};
 use crate::token::{Token, TokenKind};
+use num_bigint::BigUint;
 
 /// Represents a diagnostic message from the lexer.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -81,11 +82,11 @@ impl<'a> Lexer<'a> {
                 '!' => self.lex_single(TokenKind::Bang, start),
 
                 '+' => self.lex_single(TokenKind::Plus, start),
+                '-' => self.lex_single(TokenKind::Minus, start),
                 '*' => self.lex_single(TokenKind::Star, start),
                 '=' => self.lex_single(TokenKind::Assign, start),
 
                 ':' => self.lex_colon_or_define(start),
-                '-' => self.lex_minus_or_arrow(start),
 
                 ch if ch.is_ascii_digit() => self.lex_integer(start),
                 ch if is_ident_start(ch) => self.lex_identifier_or_keyword(start),
@@ -227,18 +228,6 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Lexes `-` or the return-type arrow `->`.
-    fn lex_minus_or_arrow(&mut self, start: Position) {
-        self.advance(); // '-'
-
-        if self.current_is('>') {
-            self.advance();
-            self.emit(TokenKind::Arrow, start);
-        } else {
-            self.emit(TokenKind::Minus, start);
-        }
-    }
-
     /// Lexes an ASCII decimal integer literal.
     fn lex_integer(&mut self, start: Position) {
         let start_byte = start.byte;
@@ -250,11 +239,11 @@ impl<'a> Lexer<'a> {
         let end_byte = self.position.byte;
         let text = &self.source[start_byte..end_byte];
 
-        match text.parse::<i128>() {
+        match text.parse::<BigUint>() {
             Ok(value) => self.emit(TokenKind::Int(value), start),
             Err(_) => self.diagnostics.push(LexDiagnostic {
                 span: Span::new(self.file, start, self.position),
-                message: format!("integer literal `{text}` does not fit in i128"),
+                message: "Couldn't lex int literal".to_string(),
             }),
         }
     }

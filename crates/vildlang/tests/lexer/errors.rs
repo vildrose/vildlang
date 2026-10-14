@@ -46,7 +46,8 @@ mod tests {
         );
     }
 
-    #[test]
+    // Not necessary after changing to BigUint
+    /*#[test]
     fn integer_too_large_is_a_diagnostic() {
         let output = lex("999999999999999999999999999999999999999", FileId(0));
 
@@ -68,7 +69,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![TokenKind::Eof],
         );
-    }
+    }*/
 
     #[test]
     fn unexpected_character_diagnostic_has_correct_span() {

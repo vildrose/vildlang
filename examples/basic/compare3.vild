@@ -1,4 +1,4 @@
-fn sign(x : int) -> int {
+fn sign(x : int) : int {
     return when compare3(x, 0) {
         less: -1
         equal: 0

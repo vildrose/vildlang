@@ -1,4 +1,4 @@
-use crate::common::tokens::kinds;
+use crate::common::tokens::{int, kinds};
 use vildlang::lexer::lex;
 use vildlang::span::FileId;
 use vildlang::token::TokenKind;
@@ -42,7 +42,7 @@ mod tests {
     fn comments_are_skipped() {
         let source = "/* Block comment. */
 // Line comment.
-fn plus_one(x : int) -> int {
+fn plus_one(x : int) : int {
     return x + 1 // Trailing line comment.
 }";
 
@@ -70,14 +70,14 @@ fn plus_one(x : int) -> int {
                 TokenKind::Colon,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::RightParen,
-                TokenKind::Arrow,
+                TokenKind::Colon,
                 TokenKind::Ident("int".to_owned()),
                 TokenKind::LeftBrace,
                 TokenKind::Newline,
                 TokenKind::Return,
                 TokenKind::Ident("x".to_owned()),
                 TokenKind::Plus,
-                TokenKind::Int(1),
+                int(1),
                 TokenKind::Newline,
                 TokenKind::RightBrace,
                 TokenKind::Eof,
@@ -117,7 +117,7 @@ fn plus_one(x : int) -> int {
             vec![
                 TokenKind::Ident("x".to_owned()),
                 TokenKind::Plus,
-                TokenKind::Int(1),
+                int(1),
                 TokenKind::Eof,
             ],
         );
@@ -126,11 +126,11 @@ fn plus_one(x : int) -> int {
     #[test]
     fn block_comment_can_contain_punctuation() {
         assert_eq!(
-            kinds("x /* () {} := -> + - * ; , */ + 1"),
+            kinds("x /* () {} := : + - * , */ + 1"),
             vec![
                 TokenKind::Ident("x".to_owned()),
                 TokenKind::Plus,
-                TokenKind::Int(1),
+                int(1),
                 TokenKind::Eof,
             ],
         );

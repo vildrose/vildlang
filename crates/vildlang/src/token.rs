@@ -1,6 +1,7 @@
 //! Tokens produced by the Vildlang lexer.
 
 use crate::span::Span;
+use num_bigint::BigUint;
 
 /// Represents a token produced by the Vildlang lexer.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,7 +37,7 @@ pub enum TokenKind {
     /// Represents an identifier.
     Ident(String),
     /// Represents an integer literal.
-    Int(i128),
+    Int(BigUint),
 
     // Punctuation
     /// Represents a left parenthesis `(`.
@@ -69,8 +70,6 @@ pub enum TokenKind {
     Define,
     /// Represents an assign `assign` `=`.
     Assign,
-    /// Represents a `return type` / `arrow` `->`.
-    Arrow,
 
     // Always the final token.
     /// Represents the end of the file.
