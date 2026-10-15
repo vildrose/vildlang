@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -10,6 +11,7 @@ jobs:
 
     env:
       CARGO_INCREMENTAL: 0
+      CARGO_TERM_COLOR: always
 
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v6
@@ -23,17 +25,19 @@ jobs:
         uses: https://github.com/Swatinem/rust-cache@v2
         with:
           shared-key: vildrose-rust
-          cache-all-crates: true
-          cache-on-failure: true
+          cache-on-failure: false
 
       - name: Install cargo-nextest
         uses: https://github.com/taiki-e/install-action@nextest
 
+      - name: Check formatting
+        run: cargo fmt --all --check
+
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
-      - name: Build benchmarks
-        run: cargo bench --workspace --no-run
-
-      - name: Test
+      - name: Test (cargo-nextest)
         run: cargo nextest run --workspace --run-ignored all
+
+      - name: Doctests
+        run: cargo test --doc --workspace
