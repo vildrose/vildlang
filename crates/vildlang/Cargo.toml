@@ -15,7 +15,6 @@ categories.workspace = true
 # Consider having some in the future
 
 [dependencies]
-num-bigint.workspace = true
 
 [dev-dependencies]
 proptest = { workspace = true }

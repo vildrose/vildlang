@@ -8,7 +8,7 @@ pub struct FileId(pub u32);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Position {
     /// Zero-based UTF-8 byte offset into the source file.
-    pub byte: usize,
+    pub offset: usize,
     /// One-based line number, for user-facing diagnostics.
     pub line: u32,
     /// One-based column number, for user-facing diagnostics.
@@ -20,7 +20,7 @@ impl Position {
     #[must_use]
     pub const fn start() -> Self {
         Self {
-            byte: 0,
+            offset: 0,
             line: 1,
             column: 1,
         }

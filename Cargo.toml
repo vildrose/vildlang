@@ -21,7 +21,6 @@ categories = []
 [workspace.dependencies]
 # Currently just using git directly, without tagged release
 vildrose-core = { git = "https://codeberg.org/vildrose/core" }
-num-bigint = "0.5"
 proptest = "1"
 insta = { version = "1", features = ["ron"] }
 criterion = { version = "0.5", features = ["html_reports"] }
