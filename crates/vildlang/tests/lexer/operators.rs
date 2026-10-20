@@ -10,9 +10,9 @@ mod tests {
         assert_eq!(
             kinds("foo := bar"),
             vec![
-                TokenKind::Ident("foo".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Define,
-                TokenKind::Ident("bar".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -23,9 +23,9 @@ mod tests {
         assert_eq!(
             kinds("foo = bar"),
             vec![
-                TokenKind::Ident("foo".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Assign,
-                TokenKind::Ident("bar".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -36,9 +36,9 @@ mod tests {
         assert_eq!(
             kinds("x : int"),
             vec![
-                TokenKind::Ident("x".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Colon,
-                TokenKind::Ident("int".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );

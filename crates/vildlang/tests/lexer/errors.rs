@@ -19,11 +19,7 @@ mod tests {
                 .into_iter()
                 .map(|token| token.kind)
                 .collect::<Vec<_>>(),
-            vec![
-                TokenKind::Fn,
-                TokenKind::Ident("sign".to_owned()),
-                TokenKind::Eof,
-            ],
+            vec![TokenKind::Fn, TokenKind::Ident, TokenKind::Eof,],
         );
     }
 
@@ -42,34 +38,9 @@ mod tests {
                 .into_iter()
                 .map(|token| token.kind)
                 .collect::<Vec<_>>(),
-            vec![TokenKind::Ident("x".to_owned()), TokenKind::Eof,],
+            vec![TokenKind::Ident, TokenKind::Eof,],
         );
     }
-
-    // Not necessary after changing to BigUint
-    /*#[test]
-    fn integer_too_large_is_a_diagnostic() {
-        let output = lex("999999999999999999999999999999999999999", FileId(0));
-
-        assert_eq!(output.diagnostics.len(), 1);
-
-        assert!(
-            output.diagnostics[0]
-                .message
-                .contains("does not fit in i128"),
-            "unexpected diagnostic: {}",
-            output.diagnostics[0].message,
-        );
-
-        assert_eq!(
-            output
-                .tokens
-                .into_iter()
-                .map(|token| token.kind)
-                .collect::<Vec<_>>(),
-            vec![TokenKind::Eof],
-        );
-    }*/
 
     #[test]
     fn unexpected_character_diagnostic_has_correct_span() {
@@ -81,8 +52,8 @@ mod tests {
 
         assert_eq!(diagnostic.message, "unexpected character `@`");
 
-        assert_eq!(diagnostic.span.start.byte, 4);
-        assert_eq!(diagnostic.span.end.byte, 5);
+        assert_eq!(diagnostic.span.start.offset, 4);
+        assert_eq!(diagnostic.span.end.offset, 5);
 
         assert_eq!(diagnostic.span.start.line, 2);
         assert_eq!(diagnostic.span.start.column, 3);

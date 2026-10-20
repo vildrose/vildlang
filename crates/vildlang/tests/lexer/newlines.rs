@@ -12,9 +12,9 @@ mod tests {
         assert_eq!(
             kinds("first\nsecond"),
             vec![
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -25,11 +25,11 @@ mod tests {
         assert_eq!(
             kinds("first\n\n\nsecond"),
             vec![
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
                 TokenKind::Newline,
                 TokenKind::Newline,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -45,11 +45,11 @@ mod tests {
                 )"
             ),
             vec![
-                TokenKind::Ident("call".to_owned()),
+                TokenKind::Ident,
                 TokenKind::LeftParen,
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Comma,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Comma,
                 TokenKind::RightParen,
                 TokenKind::Eof,
@@ -64,9 +64,9 @@ mod tests {
             vec![
                 TokenKind::LeftBrace,
                 TokenKind::Newline,
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
                 TokenKind::RightBrace,
                 TokenKind::Eof,
@@ -79,9 +79,9 @@ mod tests {
         assert_eq!(
             kinds("first // explanation\nsecond"),
             vec![
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -92,9 +92,9 @@ mod tests {
         assert_eq!(
             kinds("first /* first line\nsecond line */ second"),
             vec![
-                TokenKind::Ident("first".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Newline,
-                TokenKind::Ident("second".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Eof,
             ],
         );
@@ -105,9 +105,9 @@ mod tests {
         assert_eq!(
             kinds("call(/* comment\ncontinued */ value)"),
             vec![
-                TokenKind::Ident("call".to_owned()),
+                TokenKind::Ident,
                 TokenKind::LeftParen,
-                TokenKind::Ident("value".to_owned()),
+                TokenKind::Ident,
                 TokenKind::RightParen,
                 TokenKind::Eof,
             ],
@@ -121,8 +121,8 @@ mod tests {
         let newline = &output.tokens[1];
 
         assert_eq!(newline.kind, TokenKind::Newline);
-        assert_eq!(newline.span.start.byte, 1);
-        assert_eq!(newline.span.end.byte, 2);
+        assert_eq!(newline.span.start.offset, 1);
+        assert_eq!(newline.span.end.offset, 2);
         assert_eq!(newline.span.start.line, 1);
         assert_eq!(newline.span.start.column, 2);
         assert_eq!(newline.span.end.line, 2);

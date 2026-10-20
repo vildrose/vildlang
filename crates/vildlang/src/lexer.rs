@@ -2,7 +2,6 @@
 
 use crate::span::{FileId, Position, Span};
 use crate::token::{Token, TokenKind};
-use num_bigint::BigUint;
 
 /// Represents a diagnostic message from the lexer.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -77,19 +76,23 @@ impl<'a> Lexer<'a> {
                 '{' => self.lex_single(TokenKind::LeftBrace, start),
                 '}' => self.lex_single(TokenKind::RightBrace, start),
 
+                '[' => self.lex_single(TokenKind::LeftBracket, start),
+                ']' => self.lex_single(TokenKind::RightBracket, start),
+
                 ',' => self.lex_single(TokenKind::Comma, start),
                 ';' => self.lex_single(TokenKind::Semicolon, start),
                 '!' => self.lex_single(TokenKind::Bang, start),
 
-                '+' => self.lex_single(TokenKind::Plus, start),
-                '-' => self.lex_single(TokenKind::Minus, start),
-                '*' => self.lex_single(TokenKind::Star, start),
                 '=' => self.lex_single(TokenKind::Assign, start),
 
                 ':' => self.lex_colon_or_define(start),
 
                 ch if ch.is_ascii_digit() => self.lex_integer(start),
                 ch if is_ident_start(ch) => self.lex_identifier_or_keyword(start),
+
+                '"' => self.lex_string(start),
+
+                ch if is_operator_char(ch) => self.lex_operator(start),
 
                 _ => self.lex_unexpected_character(start),
             }
@@ -130,8 +133,8 @@ impl<'a> Lexer<'a> {
     /// ```vild
     /// fn add(
     ///     left : int,
-    ///     right : int,
-    /// ) -> int {
+    ///     right : int
+    /// ) : int {
     ///     ...
     /// }
     /// ```
@@ -230,44 +233,66 @@ impl<'a> Lexer<'a> {
 
     /// Lexes an ASCII decimal integer literal.
     fn lex_integer(&mut self, start: Position) {
-        let start_byte = start.byte;
-
         while matches!(self.current_char(), Some(ch) if ch.is_ascii_digit()) {
             self.advance();
         }
-
-        let end_byte = self.position.byte;
-        let text = &self.source[start_byte..end_byte];
-
-        match text.parse::<BigUint>() {
-            Ok(value) => self.emit(TokenKind::Int(value), start),
-            Err(_) => self.diagnostics.push(LexDiagnostic {
-                span: Span::new(self.file, start, self.position),
-                message: "Couldn't lex int literal".to_string(),
-            }),
-        }
+        self.emit(TokenKind::Int, start);
     }
 
     /// Lexes an identifier, converting reserved words to keyword tokens.
     fn lex_identifier_or_keyword(&mut self, start: Position) {
-        let start_byte = start.byte;
+        let start_offset = start.offset;
 
         while matches!(self.current_char(), Some(ch) if is_ident_continue(ch)) {
             self.advance();
         }
 
-        let end_byte = self.position.byte;
-        let text = &self.source[start_byte..end_byte];
+        let end_offset = self.position.offset;
+        let text = &self.source[start_offset..end_offset];
 
+        // TODO: Could be optimized to only check one char at a time, e.g. anything starting with 'G' would immediately be considered an identifier
         let kind = match text {
             "fn" => TokenKind::Fn,
             "return" => TokenKind::Return,
             "when" => TokenKind::When,
             "const" => TokenKind::Const,
-            _ => TokenKind::Ident(text.to_owned()),
+            _ => TokenKind::Ident,
         };
 
         self.emit(kind, start);
+    }
+
+    /// Lexes a string literal
+    fn lex_string(&mut self, start: Position) {
+        self.advance(); // Consume opening '"'
+
+        loop {
+            match self.current_char() {
+                Some('"') => {
+                    self.advance(); // Consume closing '"'
+                    self.emit(TokenKind::String, start);
+                    return;
+                }
+                Some(_) => self.advance(),
+                None => {
+                    self.diagnostics.push(LexDiagnostic {
+                        span: Span::new(self.file, start, self.position),
+                        message: "unterminated string literal".to_owned(),
+                    });
+                    // Emit it anyway for error recovery
+                    self.emit(TokenKind::String, start);
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Lexes a generic sequence of operator symbols (e.g. `+`, `<=>`, `|>`)
+    fn lex_operator(&mut self, start: Position) {
+        while matches!(self.current_char(), Some(ch) if is_operator_char(ch)) {
+            self.advance();
+        }
+        self.emit(TokenKind::Operator, start);
     }
 
     /// Reports one invalid source character and consumes it to recover.
@@ -308,7 +333,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn advance(&mut self) {
-        let Some((byte, ch)) = self.current else {
+        let Some((offset, ch)) = self.current else {
             return;
         };
 
@@ -319,7 +344,7 @@ impl<'a> Lexer<'a> {
             self.position.column += 1;
         }
 
-        self.position.byte = byte + ch.len_utf8();
+        self.position.offset = offset + ch.len_utf8();
         self.current = self.next;
         self.next = self.chars.next();
     }
@@ -339,4 +364,11 @@ const fn is_ident_start(ch: char) -> bool {
 
 const fn is_ident_continue(ch: char) -> bool {
     ch.is_ascii_alphanumeric() || ch == '_'
+}
+
+const fn is_operator_char(ch: char) -> bool {
+    matches!(
+        ch,
+        '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '|' | '&' | '%' | '^' | '\\' | '~' | '?'
+    )
 }
