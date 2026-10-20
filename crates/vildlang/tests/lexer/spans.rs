@@ -12,17 +12,17 @@ mod tests {
 
         let fn_token = &output.tokens[0];
         assert_eq!(fn_token.kind, TokenKind::Fn);
-        assert_eq!(fn_token.span.start.byte, 0);
-        assert_eq!(fn_token.span.end.byte, 2);
+        assert_eq!(fn_token.span.start.offset, 0);
+        assert_eq!(fn_token.span.end.offset, 2);
         assert_eq!(fn_token.span.start.line, 1);
         assert_eq!(fn_token.span.start.line, 1);
         assert_eq!(fn_token.span.start.column, 1);
         assert_eq!(fn_token.span.end.column, 3);
 
         let sign_token = &output.tokens[1];
-        assert_eq!(sign_token.kind, TokenKind::Ident("sign".to_owned()));
-        assert_eq!(sign_token.span.start.byte, 3);
-        assert_eq!(sign_token.span.end.byte, 7);
+        assert_eq!(sign_token.kind, TokenKind::Ident);
+        assert_eq!(sign_token.span.start.offset, 3);
+        assert_eq!(sign_token.span.end.offset, 7);
         assert_eq!(sign_token.span.start.line, 1);
         assert_eq!(sign_token.span.end.line, 1);
         assert_eq!(sign_token.span.start.column, 4);
@@ -36,8 +36,8 @@ mod tests {
         let eof = output.tokens.last().expect("lexer must emit EOF");
 
         assert_eq!(eof.kind, TokenKind::Eof);
-        assert_eq!(eof.span.start.byte, 2);
-        assert_eq!(eof.span.end.byte, 2);
+        assert_eq!(eof.span.start.offset, 2);
+        assert_eq!(eof.span.end.offset, 2);
         assert_eq!(eof.span.start.line, 1);
         assert_eq!(eof.span.end.line, 1);
         assert_eq!(eof.span.start.column, 3);
@@ -49,7 +49,7 @@ mod tests {
         let output = lex("x\n  y", FileId(0));
 
         let x = &output.tokens[0];
-        assert_eq!(x.kind, TokenKind::Ident("x".to_owned()));
+        assert_eq!(x.kind, TokenKind::Ident);
         assert_eq!(x.span.start.line, 1);
         assert_eq!(x.span.start.column, 1);
         assert_eq!(x.span.end.line, 1);
@@ -59,9 +59,9 @@ mod tests {
         assert_eq!(newline.kind, TokenKind::Newline);
 
         let y = &output.tokens[2];
-        assert_eq!(y.kind, TokenKind::Ident("y".to_owned()));
-        assert_eq!(y.span.start.byte, 4);
-        assert_eq!(y.span.end.byte, 5);
+        assert_eq!(y.kind, TokenKind::Ident);
+        assert_eq!(y.span.start.offset, 4);
+        assert_eq!(y.span.end.offset, 5);
         assert_eq!(y.span.start.line, 2);
         assert_eq!(y.span.start.column, 3);
         assert_eq!(y.span.end.line, 2);
@@ -75,8 +75,8 @@ mod tests {
         let define = &output.tokens[1];
 
         assert_eq!(define.kind, TokenKind::Define);
-        assert_eq!(define.span.start.byte, 4);
-        assert_eq!(define.span.end.byte, 6);
+        assert_eq!(define.span.start.offset, 4);
+        assert_eq!(define.span.end.offset, 6);
         assert_eq!(define.span.start.line, 1);
         assert_eq!(define.span.end.line, 1);
         assert_eq!(define.span.start.column, 5);

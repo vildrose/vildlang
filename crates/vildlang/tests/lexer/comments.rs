@@ -1,4 +1,4 @@
-use crate::common::tokens::{int, kinds};
+use crate::common::tokens::kinds;
 use vildlang::lexer::lex;
 use vildlang::span::FileId;
 use vildlang::token::TokenKind;
@@ -64,20 +64,20 @@ fn plus_one(x : int) : int {
                 TokenKind::Newline,
                 TokenKind::Newline,
                 TokenKind::Fn,
-                TokenKind::Ident("plus_one".to_owned()),
+                TokenKind::Ident,
                 TokenKind::LeftParen,
-                TokenKind::Ident("x".to_owned()),
+                TokenKind::Ident,
                 TokenKind::Colon,
-                TokenKind::Ident("int".to_owned()),
+                TokenKind::Ident,
                 TokenKind::RightParen,
                 TokenKind::Colon,
-                TokenKind::Ident("int".to_owned()),
+                TokenKind::Ident,
                 TokenKind::LeftBrace,
                 TokenKind::Newline,
                 TokenKind::Return,
-                TokenKind::Ident("x".to_owned()),
-                TokenKind::Plus,
-                int(1),
+                TokenKind::Ident,
+                TokenKind::Operator,
+                TokenKind::Int,
                 TokenKind::Newline,
                 TokenKind::RightBrace,
                 TokenKind::Eof,
@@ -106,7 +106,7 @@ fn plus_one(x : int) : int {
     fn line_comment_at_end_of_file_needs_no_newline() {
         assert_eq!(
             kinds("x // Trailing comment with no newline"),
-            vec![TokenKind::Ident("x".to_owned()), TokenKind::Eof,],
+            vec![TokenKind::Ident, TokenKind::Eof,],
         );
     }
 
@@ -115,9 +115,9 @@ fn plus_one(x : int) : int {
         assert_eq!(
             kinds("x /**/ + 1"),
             vec![
-                TokenKind::Ident("x".to_owned()),
-                TokenKind::Plus,
-                int(1),
+                TokenKind::Ident,
+                TokenKind::Operator,
+                TokenKind::Int,
                 TokenKind::Eof,
             ],
         );
@@ -128,9 +128,9 @@ fn plus_one(x : int) : int {
         assert_eq!(
             kinds("x /* () {} := : + - * , */ + 1"),
             vec![
-                TokenKind::Ident("x".to_owned()),
-                TokenKind::Plus,
-                int(1),
+                TokenKind::Ident,
+                TokenKind::Operator,
+                TokenKind::Int,
                 TokenKind::Eof,
             ],
         );
@@ -140,11 +140,7 @@ fn plus_one(x : int) : int {
     fn comment_between_tokens_does_not_merge_identifiers() {
         assert_eq!(
             kinds("left/* ignored */right"),
-            vec![
-                TokenKind::Ident("left".to_owned()),
-                TokenKind::Ident("right".to_owned()),
-                TokenKind::Eof,
-            ],
+            vec![TokenKind::Ident, TokenKind::Ident, TokenKind::Eof,],
         );
     }
 }
